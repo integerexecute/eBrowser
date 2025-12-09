@@ -1,4 +1,6 @@
 ﻿using e621NET;
+using e621NET.Data.Posts;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -9,14 +11,14 @@ using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
-using Windows.System;
 using Windows.Foundation.Collections;
-using System.Diagnostics;
-using e621NET.Data.Posts;
+using Windows.System;
+using Windows.UI.Core;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -57,15 +59,15 @@ namespace eBrowser.Windows.Views.Pages
         private void BtnSearch_Click(object sender, RoutedEventArgs e)
         {
             currentPage = 1;
-            SearchPost();
+            SearchPost(true);
         }
 
-        public async void SearchPost()
+        public async void SearchPost(bool initialSearch)
         {
             BtnSearch.IsEnabled = false;
             SearchBox.IsEnabled = false;
 
-            var posts = await e621Client.Current.GetPostsAsync(SearchBox.Text, currentPage);
+            var posts = await MainWindow.Client.GetPostsAsync(SearchBox.Text, currentPage, fetchMaxPage: initialSearch);
             if (posts == null)
             {
                 SearchBox.IsEnabled = true;
@@ -85,7 +87,8 @@ namespace eBrowser.Windows.Views.Pages
                 }
 
                 currentPage = posts.Page;
-                totalPages = posts.MaxPage;
+                if (initialSearch)
+                    totalPages = posts.MaxPage;
 
                 if (!SearchHistoryList.Items.Contains(SearchBox.Text))
                     SearchHistoryList.Items.Add(SearchBox.Text);
@@ -141,7 +144,7 @@ namespace eBrowser.Windows.Views.Pages
             if (currentPage > 1)
             {
                 currentPage--;
-                SearchPost();
+                SearchPost(false);
             }
         }
 
@@ -150,7 +153,7 @@ namespace eBrowser.Windows.Views.Pages
             if (currentPage < totalPages)
             {
                 currentPage++;
-                SearchPost();
+                SearchPost(false);
             }
         }
 
@@ -199,28 +202,46 @@ namespace eBrowser.Windows.Views.Pages
 
             Debug.WriteLine("All conditions passed — processing key input");
 
-            switch (e.Key)
+            var ctrl = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control)
+                .HasFlag(CoreVirtualKeyStates.Down);
+
+            if (ctrl && e.Key == VirtualKey.L)
             {
-                case VirtualKey.Left:
-                    Debug.WriteLine("[PostsPage] LEFT ARROW → Back page");
-                    BtnBack_Click(this, e);
-                    e.Handled = true;
-                    break;
+                Debug.WriteLine("CTRL + L detected!");
+                SearchBox.Focus(FocusState.Programmatic);
+                e.Handled = true;
+                return;
+            }
+            else
+            {
+                switch (e.Key)
+                {
+                    case VirtualKey.Left:
+                        Debug.WriteLine("[PostsPage] LEFT ARROW → Back page");
+                        BtnBack_Click(this, e);
+                        e.Handled = true;
+                        break;
 
-                case VirtualKey.Right:
-                    Debug.WriteLine("[PostsPage] RIGHT ARROW → Next page");
-                    BtnNext_Click(this, e);
-                    e.Handled = true;
-                    break;
+                    case VirtualKey.Right:
+                        Debug.WriteLine("[PostsPage] RIGHT ARROW → Next page");
+                        BtnNext_Click(this, e);
+                        e.Handled = true;
+                        break;
 
-                case VirtualKey.Enter:
-                    Debug.WriteLine("[PostsPage] ENTER → Open first post");
-                    e.Handled = true;
-                    break;
+                    case VirtualKey.Enter:
+                        Debug.WriteLine("[PostsPage] ENTER → Open first post");
+                        if (ShownPosts.Count > 0)
+                        {
+                            var param = new ViewerParams([.. ShownPosts], ShownPosts[0]);
+                            Frame.Navigate(typeof(ViewerPage), param);
+                        }
+                        e.Handled = true;
+                        break;
 
-                default:
-                    Debug.WriteLine("Key not handled");
-                    break;
+                    default:
+                        Debug.WriteLine("Key not handled");
+                        break;
+                }
             }
 
             Debug.WriteLine($"Handled after processing: {e.Handled}");

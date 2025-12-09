@@ -45,6 +45,7 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="H.NotifyIcon.WinUI" Version="2.3.2" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
   </ItemGroup>
@@ -108,5 +109,6 @@
     <Description>A WinUI 3 client for the website e621.net</Description>
     <Copyright>Copyright (c) Bunzhida 2025</Copyright>
     <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 </Project>

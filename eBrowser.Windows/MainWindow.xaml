@@ -14,6 +14,7 @@
             <RowDefinition Height="32"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
         <Grid x:Name="AppTitleBar" Height="32">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="LeftPaddingColumn" Width="0"/>

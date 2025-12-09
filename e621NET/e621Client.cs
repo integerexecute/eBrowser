@@ -41,8 +41,6 @@ namespace e621NET
             {
                 Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds > 0 ? options.TimeoutSeconds : 100)
             };
-
-            // Note: We do not mutate DefaultRequestHeaders globally.
         }
 
         #region Public API
@@ -71,7 +69,6 @@ namespace e621NET
             if (limit > 0) q["limit"] = limit.ToString();
 
             var jsonUrl = GetUri(Host, "posts.json") + (q.Count > 0 ? ("?" + q) : string.Empty);
-            var htmlUrl = GetUri(Host, "posts") + (q.Count > 0 ? ("?" + q) : string.Empty);
 
             // Request JSON
             var jsonReq = BuildRequest(HttpMethod.Get, jsonUrl);
@@ -104,6 +101,7 @@ namespace e621NET
             {
                 try
                 {
+                    var htmlUrl = GetUri(Host, "posts") + (q.Count > 0 ? ("?" + q) : string.Empty);
                     var htmlReq = BuildRequest(HttpMethod.Get, htmlUrl);
                     var htmlResp = await SendAsync(htmlReq);
                     if (htmlResp.IsSuccess && !string.IsNullOrWhiteSpace(htmlResp.ContentText))

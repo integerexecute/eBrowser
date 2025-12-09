@@ -11,7 +11,7 @@
   <Identity
     Name="fa50f23e-5a40-4978-950d-422a5df792f3"
     Publisher="CN=Bunzhida"
-    Version="1.0.0.0" />
+    Version="1.0.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="fa50f23e-5a40-4978-950d-422a5df792f3" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
