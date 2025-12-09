@@ -15,7 +15,7 @@ For eBrowser.Linux:
 - [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
 ### Get the Application
-Just download the [latest archive](https://github.com/Bunz-Studio/eBrowser/releases/latest) from the Releases section!
+This new version has no release yet
 
 ## Features
 - Navigation shortcuts from post to post: Right arrow/left arrow to go to the next/previous post
