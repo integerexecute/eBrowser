@@ -1,6 +1,5 @@
 using e621NET;
 using eBrowser.Windows.Views.Pages;
-using H.NotifyIcon;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -9,8 +8,6 @@ using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Diagnostics;
 using SystemTray.Core;
-using SystemTray.UI;
-using static SystemTray.Core.SystemTrayManager;
 
 namespace eBrowser.Windows
 {
@@ -21,6 +18,7 @@ namespace eBrowser.Windows
 
         public static Page ActivePage = null!;
         public static event Action<object, KeyRoutedEventArgs>? OnKeyDown;
+        public static Action<UIElement> RegisterKeyDown = null!;
 
         private SystemTrayManager systemTrayManager;
         private WindowHelper windowHelper;
@@ -30,17 +28,13 @@ namespace eBrowser.Windows
             InitializeComponent();
             CustomizeTitleBar();
 
+            RegisterKeyDown += element =>
+            {
+                element.PreviewKeyDown += RootFrame_PreviewKeyDown;
+            };
             NavView.PreviewKeyDown += RootFrame_PreviewKeyDown;
             RootFrame.PreviewKeyDown += RootFrame_PreviewKeyDown;
             RootFrame.Navigated += OnRootFrameNavigated;
-            AppWindow.Closing += (s, e) =>
-            {
-                if (Configuration.Current.HideToSystemTray)
-                {
-                    e.Cancel = true;
-                    this.Hide();
-                }
-            };
 
             windowHelper = new WindowHelper(this);
             systemTrayManager = new SystemTrayManager(windowHelper)

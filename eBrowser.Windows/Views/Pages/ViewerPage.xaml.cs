@@ -29,6 +29,8 @@ namespace eBrowser.Windows.Views.Pages
         public ViewerPage()
         {
             InitializeComponent();
+
+            MainWindow.RegisterKeyDown(webView);
             MainWindow.OnKeyDown += Page_KeyDown;
         }
 

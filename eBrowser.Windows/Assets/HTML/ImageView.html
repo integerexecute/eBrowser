@@ -2,13 +2,163 @@
     <style>
         body {
             background-color: #151515;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            user-select: none;
         }
 
-        .cover {
-            object-fit: contain;
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+            .controls button {
+                padding: 6px 12px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                background: #333;
+                color: white;
+            }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+            transform-origin: 0 0; /* important for scaling at top-left */
+        }
+
+            #container.dragging {
+                cursor: grabbing;
+            }
+
+        #main-img {
             width: 100%;
             height: 100%;
+            object-fit: contain;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
     </style>
-    <img id="main-img" class="cover" src="{IMAGE_URL}" />
+
+    <div class="controls">
+        <button id="zoom-in">Zoom +</button>
+        <button id="zoom-out">Zoom −</button>
+        <button id="reset">Reset</button>
+    </div>
+
+    <div id="container">
+        <img id="main-img" src="{IMAGE_URL}" />
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        const resetBtn = document.getElementById('reset');
+
+        let dragging = false;
+        let startX = 0;
+        let startY = 0;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // scale state
+        let scale = 1;
+        const minScale = 0.2;
+        const maxScale = 5;
+
+        // Dragging
+        container.addEventListener('mousedown', (e) => {
+            dragging = true;
+            container.classList.add('dragging');
+            startX = e.clientX - offsetX;
+            startY = e.clientY - offsetY;
+        });
+
+        window.addEventListener('mouseup', () => {
+            dragging = false;
+            container.classList.remove('dragging');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            offsetX = e.clientX - startX;
+            offsetY = e.clientY - startY;
+            updateTransform();
+        });
+
+        // Zoom functions
+        function updateTransform() {
+            container.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+        }
+
+        // Mouse wheel zoom (cursor-centered)
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+            const newScale = Math.min(Math.max(scale * zoomFactor, minScale), maxScale);
+
+            // Compute point under cursor
+            const x = (e.clientX - offsetX) / scale;
+            const y = (e.clientY - offsetY) / scale;
+
+            // Apply new scale
+            scale = newScale;
+
+            // Adjust offset so the point stays under cursor
+            offsetX = e.clientX - x * scale;
+            offsetY = e.clientY - y * scale;
+
+            updateTransform();
+        }, { passive: false });
+
+        // Buttons
+        zoomInBtn.addEventListener('click', () => {
+            const rect = container.getBoundingClientRect();
+            const cx = rect.width / 2;
+            const cy = rect.height / 2;
+            const newScale = Math.min(scale * 1.2, maxScale);
+
+            offsetX = offsetX - cx * (newScale - scale);
+            offsetY = offsetY - cy * (newScale - scale);
+            scale = newScale;
+            updateTransform();
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            const rect = container.getBoundingClientRect();
+            const cx = rect.width / 2;
+            const cy = rect.height / 2;
+            const newScale = Math.max(scale / 1.2, minScale);
+
+            offsetX = offsetX - cx * (newScale - scale);
+            offsetY = offsetY - cy * (newScale - scale);
+            scale = newScale;
+            updateTransform();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            offsetX = 0;
+            offsetY = 0;
+            scale = 1;
+            updateTransform();
+        });
+
+        // Initialize
+        updateTransform();
+    </script>
+
 </body>
