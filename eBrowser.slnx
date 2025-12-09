@@ -1,0 +1,15 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="e621NET/e621NET.csproj" />
+  <Project Path="eBrowser.Linux/eBrowser.Linux.csproj" Id="440d1153-5eb1-4fb3-83b3-b8e9f7bc31d4" />
+  <Project Path="eBrowser.Windows/eBrowser.Windows.csproj">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy />
+  </Project>
+</Solution>

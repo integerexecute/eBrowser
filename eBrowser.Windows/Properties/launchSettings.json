@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "eBrowser.Windows (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "eBrowser.Windows (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

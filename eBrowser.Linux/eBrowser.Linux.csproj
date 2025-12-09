@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyTitle>eBrowser</AssemblyTitle>
+    <RootNamespace>eBrowser</RootNamespace>
+    <AssemblyName>eBrowser</AssemblyName>
+    <Title>eBrowser</Title>
+    <Description>A GTK client for the website e621.net</Description>
+    <Copyright>Copyright (c) Bunzhida 2025</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="**\*.glade" />
+    <EmbeddedResource Include="**\*.glade">
+      <LogicalName>%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GtkSharp" Version="3.24.24.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\e621NET\e621NET.csproj" />
+  </ItemGroup>
+
+</Project>
