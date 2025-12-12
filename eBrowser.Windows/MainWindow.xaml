@@ -27,7 +27,7 @@
                 Width="16" Height="16"
                 Margin="8,0,0,0"/>
             <TextBlock x:Name="TitleBarTextBlock" 
-               Text="eBrowser" 
+               Text="eBrowser"
                Style="{StaticResource CaptionTextBlockStyle}"
                Grid.Column="1"
                VerticalAlignment="Center"

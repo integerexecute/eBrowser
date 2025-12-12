@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.Json;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.System;
@@ -25,13 +26,14 @@ using Windows.UI.Core;
 
 namespace eBrowser.Windows.Views.Pages
 {
-    public sealed partial class PostsPage : Page
+    public sealed partial class PostsPage : Page, IPageKeyHandler
     {
         private ItemsWrapGrid? wrapGrid;
 
         public ePosts? originalQuery;
         public ObservableCollection<ePost> ShownPosts { get; } = [];
         public string SortValue = "Date";
+        public string postsPath => Path.Combine(Configuration.appDataDirectory, "posts.json");
 
         public PostsPage()
         {
@@ -40,11 +42,29 @@ namespace eBrowser.Windows.Views.Pages
                 MainWindow.ActivePage = this;
 
             InitializeComponent();
-            MainWindow.OnKeyDown += Page_PreviewKeyDown;
 
             BtnSearch.Click += BtnSearch_Click;
             ImageGridView.LayoutUpdated += ImageGridView_LayoutUpdated;
             SearchBox.KeyDown += SearchBox_KeyDown;
+
+            if (File.Exists(postsPath))
+            {
+                var content = File.ReadAllText(postsPath);
+                var data = JsonSerializer.Deserialize<ePosts>(content);
+                if (data != null)
+                {
+                    currentPage = data.Page;
+                    totalPages = data.MaxPage;
+                    data.MaxPage = 750;
+
+                    SearchBox.Text = data.Query;
+                    ShowPosts(data, true);
+
+                    SearchBox.IsEnabled = true;
+                    BtnSearch.IsEnabled = true;
+                    Focus(FocusState.Programmatic);
+                }
+            }
         }
 
         private void SearchBox_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -75,6 +95,17 @@ namespace eBrowser.Windows.Views.Pages
                 return;
             }
 
+            Configuration.EnsureAppDataDirectoryExists();
+            File.WriteAllText(postsPath, JsonSerializer.Serialize(posts));
+            ShowPosts(posts, initialSearch);
+
+            SearchBox.IsEnabled = true;
+            BtnSearch.IsEnabled = true;
+            Focus(FocusState.Programmatic);
+        }
+
+        public void ShowPosts(ePosts posts, bool initialSearch)
+        {
             originalQuery = posts;
 
             if (posts.Posts.Count > 0)
@@ -96,10 +127,6 @@ namespace eBrowser.Windows.Views.Pages
                 UpdatePageLabel();
                 ApplySort(SortValue);
             }
-
-            SearchBox.IsEnabled = true;
-            BtnSearch.IsEnabled = true;
-            Focus(FocusState.Programmatic);
         }
 
         private void ImageGridView_LayoutUpdated(object? sender, object e) => UpdateItemWidth();
@@ -166,20 +193,54 @@ namespace eBrowser.Windows.Views.Pages
             }
         }
 
-        private void Page_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
+        private void SortBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var item = SortBox.SelectedItem as ComboBoxItem;
+            SortValue = item?.Content.ToString() ?? "";
+
+            Debug.WriteLine($"Sort changed to: {SortValue}");
+            ApplySort(SortValue);
+        }
+
+        private void ApplySort(string value)
+        {
+            if (ShownPosts.Count == 0)
+                return;
+
+            IEnumerable<ePost> sorted;
+
+            switch (value)
+            {
+                case "Date":
+                    sorted = ShownPosts.OrderByDescending(p => p.CreatedAt);
+                    break;
+
+                case "Favorites":
+                    sorted = ShownPosts.OrderByDescending(p => p.FavCount);
+                    break;
+
+                case "Score":
+                    sorted = ShownPosts.OrderByDescending(p => p.Score.Total);
+                    break;
+
+                default:
+                    return;
+            }
+
+            // Replace items in the observable collection
+            var sortedList = sorted.ToList();
+            ShownPosts.Clear();
+            foreach (var post in sortedList)
+                ShownPosts.Add(post);
+
+            Debug.WriteLine($"[PostsPage] Sorted by {value}");
+        }
+
+        public void OnPageKeyDown(object sender, KeyRoutedEventArgs e)
         {
             Debug.WriteLine("==== [PostsPage] Key Event START ====");
             Debug.WriteLine($"Key: {e.Key}");
             Debug.WriteLine($"Handled before processing: {e.Handled}");
-
-            // Check if this page is active
-            if (MainWindow.ActivePage is not PostsPage)
-            {
-                Debug.WriteLine("Blocked: ActivePage is NOT PostsPage");
-                Debug.WriteLine($"ActivePage is: {MainWindow.ActivePage?.GetType().Name ?? "null"}");
-                Debug.WriteLine("==== [PostsPage] Key Event END ====");
-                return;
-            }
 
             Debug.WriteLine("Condition passed: ActivePage is PostsPage");
 
@@ -228,8 +289,8 @@ namespace eBrowser.Windows.Views.Pages
                         e.Handled = true;
                         break;
 
-                    case VirtualKey.Enter:
-                        Debug.WriteLine("[PostsPage] ENTER → Open first post");
+                    case (VirtualKey)191:
+                        Debug.WriteLine("[PostsPage] Slash → Open first post");
                         if (ShownPosts.Count > 0)
                         {
                             var param = new ViewerParams([.. ShownPosts], ShownPosts[0]);
@@ -246,49 +307,6 @@ namespace eBrowser.Windows.Views.Pages
 
             Debug.WriteLine($"Handled after processing: {e.Handled}");
             Debug.WriteLine("==== [PostsPage] Key Event END ====");
-        }
-
-        private void SortBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var item = SortBox.SelectedItem as ComboBoxItem;
-            SortValue = item?.Content.ToString() ?? "";
-
-            Debug.WriteLine($"Sort changed to: {SortValue}");
-            ApplySort(SortValue);
-        }
-
-        private void ApplySort(string value)
-        {
-            if (ShownPosts.Count == 0)
-                return;
-
-            IEnumerable<ePost> sorted;
-
-            switch (value)
-            {
-                case "Date":
-                    sorted = ShownPosts.OrderByDescending(p => p.CreatedAt);
-                    break;
-
-                case "Favorites":
-                    sorted = ShownPosts.OrderByDescending(p => p.FavCount);
-                    break;
-
-                case "Score":
-                    sorted = ShownPosts.OrderByDescending(p => p.Score.Total);
-                    break;
-
-                default:
-                    return;
-            }
-
-            // Replace items in the observable collection
-            var sortedList = sorted.ToList();
-            ShownPosts.Clear();
-            foreach (var post in sortedList)
-                ShownPosts.Add(post);
-
-            Debug.WriteLine($"[PostsPage] Sorted by {value}");
         }
     }
 }

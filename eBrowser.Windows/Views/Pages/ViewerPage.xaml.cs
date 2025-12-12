@@ -21,7 +21,7 @@ using Windows.System;
 
 namespace eBrowser.Windows.Views.Pages
 {
-    public sealed partial class ViewerPage : Page
+    public sealed partial class ViewerPage : Page, IPageKeyHandler
     {
         private List<ePost> currentPosts = [];
         private ePost? currentPost;
@@ -29,9 +29,6 @@ namespace eBrowser.Windows.Views.Pages
         public ViewerPage()
         {
             InitializeComponent();
-
-            MainWindow.RegisterKeyDown(webView);
-            MainWindow.OnKeyDown += Page_KeyDown;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -100,13 +97,13 @@ namespace eBrowser.Windows.Views.Pages
             string html = await File.ReadAllTextAsync(htmlPath);
             html = html.Replace(isVideo ? "{VIDEO_URL}" : "{IMAGE_URL}", url);
             if (isVideo)
-                html.Replace("{ADDITIONAL_PARAM}", "");
+                html = html.Replace("{ADDITIONAL_PARAM}", Configuration.Current.AutoMuteVideo ? " muted" : "");
 
             webView.NavigateToString(html);
 
             webView.CoreWebView2.DOMContentLoaded += async (_, _) =>
             {
-                if (isVideo)
+                if (isVideo && Configuration.Current.AutoPlayVideo)
                 {
                     await webView.CoreWebView2.ExecuteScriptAsync("playVideo();");
                 }
@@ -132,30 +129,6 @@ namespace eBrowser.Windows.Views.Pages
             return string.Format("{0:0.##} {1}", dblSByte, sizeSuffixes[i]);
         }
 
-        private void Page_KeyDown(object sender, KeyRoutedEventArgs e)
-        {
-            if (MainWindow.ActivePage is not ViewerPage) return;
-            if (e.Handled) return;
-
-            switch (e.Key)
-            {
-                case VirtualKey.Left:
-                    BtnBack_Click(sender, e);
-                    e.Handled = true;
-                    break;
-
-                case VirtualKey.Right:
-                    BtnNext_Click(sender, e);
-                    e.Handled = true;
-                    break;
-
-                case VirtualKey.Escape:
-                    if (Frame.CanGoBack) Frame.GoBack();
-                    e.Handled = true;
-                    break;
-            }
-        }
-
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
             if (currentPosts == null || currentPost == null) return;
@@ -172,6 +145,37 @@ namespace eBrowser.Windows.Views.Pages
             int index = currentPosts.IndexOf(currentPost);
             index = (index + 1) % currentPosts.Count;
             ShowPost(index);
+        }
+
+        public void OnPageKeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (MainWindow.ActivePage is not ViewerPage) return;
+            if (e.Handled)
+            {
+                Debug.WriteLine("[ViewerPage] Handled key detected");
+                return;
+            }
+
+            switch (e.Key)
+            {
+                case VirtualKey.Left:
+                    Debug.WriteLine("[ViewerPage] Back post");
+                    BtnBack_Click(sender, e);
+                    e.Handled = true;
+                    break;
+
+                case VirtualKey.Right:
+                    Debug.WriteLine("[ViewerPage] Next post");
+                    BtnNext_Click(sender, e);
+                    e.Handled = true;
+                    break;
+
+                case VirtualKey.Escape:
+                    Debug.WriteLine("[ViewerPage] Go back");
+                    if (Frame.CanGoBack) Frame.GoBack();
+                    e.Handled = true;
+                    break;
+            }
         }
     }
 

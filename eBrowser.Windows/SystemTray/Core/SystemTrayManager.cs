@@ -167,11 +167,17 @@ namespace SystemTray.Core
 
             menuItems =
             [
-                new SystemTrayContextMenuWindow.Item(texts[0], new Command(windowHelper.ShowWindowFromTray)),
+                new SystemTrayContextMenuWindow.Item(texts[0], new Command(ShowWindow)),
                 new SystemTrayContextMenuWindow.Item(texts[1], new Command(OpenSettings)),
                 new SystemTrayContextMenuWindow.Item("--", null),
                 new SystemTrayContextMenuWindow.Item(texts[2], new Command(Application.Current.Exit))
             ];
+        }
+
+        public void ShowWindow()
+        {
+            if (windowHelper.AppWindow.IsVisible) return;
+            windowHelper.ShowWindowFromTray();
         }
 
         private static string[] GetMenuTexts(string langCode)

@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using SystemTray.Core;
 
 namespace eBrowser.Windows
@@ -28,12 +29,9 @@ namespace eBrowser.Windows
             InitializeComponent();
             CustomizeTitleBar();
 
-            RegisterKeyDown += element =>
-            {
-                element.PreviewKeyDown += RootFrame_PreviewKeyDown;
-            };
-            NavView.PreviewKeyDown += RootFrame_PreviewKeyDown;
-            RootFrame.PreviewKeyDown += RootFrame_PreviewKeyDown;
+            Content.AddHandler(UIElement.KeyDownEvent,
+                new KeyEventHandler(Content_PreviewKeyDown),
+                handledEventsToo: true);
             RootFrame.Navigated += OnRootFrameNavigated;
 
             windowHelper = new WindowHelper(this);
@@ -53,7 +51,7 @@ namespace eBrowser.Windows
             };
 
             NavView.SelectedItem = NavView.MenuItems[0];
-            RootFrame.Navigate(typeof(Views.Pages.PostsPage));
+            RootFrame.Navigate(typeof(PostsPage));
             RootFrame.Focus(FocusState.Programmatic);
         }
 
@@ -64,17 +62,14 @@ namespace eBrowser.Windows
 
         private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
         {
-            // Update ActivePage reference
             if (e.Content is Page page)
             {
                 Debug.WriteLine($"ActivePage set as: " + page.GetType().Name);
                 ActivePage = page;
             }
 
-            // Your existing navigation view sync logic
             Type pageType = e.SourcePageType;
-
-            foreach (NavigationViewItem item in NavView.MenuItems)
+            foreach (NavigationViewItem item in NavView.MenuItems.Cast<NavigationViewItem>())
             {
                 if (item.Tag?.ToString() == pageType.Name)
                 {
@@ -83,15 +78,19 @@ namespace eBrowser.Windows
                 }
             }
 
-            if (pageType == typeof(Views.Pages.SettingsPage))
+            if (pageType == typeof(SettingsPage))
             {
                 NavView.SelectedItem = NavView.SettingsItem;
             }
         }
 
-        private void RootFrame_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
+        private void Content_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
         {
-            OnKeyDown?.Invoke(sender, e);
+            Debug.WriteLine($"Key: {e.Key}");
+            if (ActivePage is IPageKeyHandler handler)
+            {
+                handler.OnPageKeyDown(sender, e);
+            }
         }
 
         private void NavView_SelectionChanged(
@@ -130,5 +129,10 @@ namespace eBrowser.Windows
                 Title = "eBrowser";
             }
         }
+    }
+
+    public interface IPageKeyHandler
+    {
+        void OnPageKeyDown(object sender, KeyRoutedEventArgs e);
     }
 }

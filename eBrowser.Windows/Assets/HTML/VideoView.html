@@ -12,7 +12,7 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            display: flex;
+            display: none;
             gap: 10px;
             z-index: 10;
         }
@@ -56,13 +56,15 @@
     </div>
 
     <div id="container">
-        <video id="vid" controls loop>
+        <video id="vid" controls loop{ADDITIONAL_PARAM}>
             <source src="{VIDEO_URL}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
 
     <script>
+        function playVideo() { document.getElementById("vid").play(); } function pauseVideo() { document.getElementById("vid").pause(); }
+
         const container = document.getElementById('container');
         const zoomInBtn = document.getElementById('zoom-in');
         const zoomOutBtn = document.getElementById('zoom-out');
