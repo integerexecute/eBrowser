@@ -158,13 +158,13 @@ namespace eBrowser.Windows.Views.Pages
 
             switch (e.Key)
             {
-                case VirtualKey.Left:
+                case VirtualKey.A:
                     Debug.WriteLine("[ViewerPage] Back post");
                     BtnBack_Click(sender, e);
                     e.Handled = true;
                     break;
 
-                case VirtualKey.Right:
+                case VirtualKey.D:
                     Debug.WriteLine("[ViewerPage] Next post");
                     BtnNext_Click(sender, e);
                     e.Handled = true;

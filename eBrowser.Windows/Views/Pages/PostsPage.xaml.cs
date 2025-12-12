@@ -108,9 +108,9 @@ namespace eBrowser.Windows.Views.Pages
         {
             originalQuery = posts;
 
+            ShownPosts.Clear();
             if (posts.Posts.Count > 0)
             {
-                ShownPosts.Clear();
                 foreach (var post in posts.Posts)
                 {
                     if (post.Preview.Url != null)
@@ -168,18 +168,24 @@ namespace eBrowser.Windows.Views.Pages
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
+            if (originalQuery == null) return;
+
             if (currentPage > 1)
             {
                 currentPage--;
+                SearchBox.Text = originalQuery.Query;
                 SearchPost(false);
             }
         }
 
         private void BtnNext_Click(object sender, RoutedEventArgs e)
         {
+            if (originalQuery == null) return;
+
             if (currentPage < totalPages)
             {
                 currentPage++;
+                SearchBox.Text = originalQuery.Query;
                 SearchPost(false);
             }
         }
@@ -238,30 +244,12 @@ namespace eBrowser.Windows.Views.Pages
 
         public void OnPageKeyDown(object sender, KeyRoutedEventArgs e)
         {
-            Debug.WriteLine("==== [PostsPage] Key Event START ====");
-            Debug.WriteLine($"Key: {e.Key}");
-            Debug.WriteLine($"Handled before processing: {e.Handled}");
-
-            Debug.WriteLine("Condition passed: ActivePage is PostsPage");
-
-            // Check focus state
-            Debug.WriteLine($"SearchBox focus state: {SearchBox.FocusState}");
             if (SearchBox.FocusState != FocusState.Unfocused)
-            {
-                Debug.WriteLine("Blocked: SearchBox IS focused");
-                Debug.WriteLine("==== [PostsPage] Key Event END ====");
                 return;
-            }
 
             // Check if the event was already handled
             if (e.Handled)
-            {
-                Debug.WriteLine("Blocked: Event was already handled by another control");
-                Debug.WriteLine("==== [PostsPage] Key Event END ====");
                 return;
-            }
-
-            Debug.WriteLine("All conditions passed — processing key input");
 
             var ctrl = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control)
                 .HasFlag(CoreVirtualKeyStates.Down);
@@ -277,20 +265,26 @@ namespace eBrowser.Windows.Views.Pages
             {
                 switch (e.Key)
                 {
-                    case VirtualKey.Left:
-                        Debug.WriteLine("[PostsPage] LEFT ARROW → Back page");
+                    case VirtualKey.E:
+                        Debug.WriteLine("[PostsPage] E → Focus SearchBox");
+                        SearchBox.Focus(FocusState.Programmatic);
+                        e.Handled = true;
+                        break;
+
+                    case VirtualKey.A:
+                        Debug.WriteLine("[PostsPage] A → Back page");
                         BtnBack_Click(this, e);
                         e.Handled = true;
                         break;
 
-                    case VirtualKey.Right:
-                        Debug.WriteLine("[PostsPage] RIGHT ARROW → Next page");
+                    case VirtualKey.D:
+                        Debug.WriteLine("[PostsPage] D → Next page");
                         BtnNext_Click(this, e);
                         e.Handled = true;
                         break;
 
-                    case (VirtualKey)191:
-                        Debug.WriteLine("[PostsPage] Slash → Open first post");
+                    case VirtualKey.S:
+                        Debug.WriteLine("[PostsPage] S → Open first post");
                         if (ShownPosts.Count > 0)
                         {
                             var param = new ViewerParams([.. ShownPosts], ShownPosts[0]);
@@ -304,9 +298,6 @@ namespace eBrowser.Windows.Views.Pages
                         break;
                 }
             }
-
-            Debug.WriteLine($"Handled after processing: {e.Handled}");
-            Debug.WriteLine("==== [PostsPage] Key Event END ====");
         }
     }
 }
