@@ -110,5 +110,6 @@
     <Copyright>Copyright (c) Bunzhida 2025</Copyright>
     <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <WindowsPackageType>None</WindowsPackageType>
   </PropertyGroup>
 </Project>

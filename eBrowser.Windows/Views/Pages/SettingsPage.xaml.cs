@@ -1,3 +1,4 @@
+using e621NET;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Diagnostics;
@@ -17,6 +18,8 @@ namespace eBrowser.Windows.Views.Pages
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!string.IsNullOrWhiteSpace(Config.Username) && !string.IsNullOrWhiteSpace(Config.ApiKey))
+                MainWindow.Client.SetCredentials(new e621APICredentials(Config.Username, Config.ApiKey));
             Configuration.Save();
         }
 

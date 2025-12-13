@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
 using SystemTray.Interfaces;
@@ -301,7 +302,7 @@ namespace SystemTray.Core
             public IcoIcon(string path)
             {
                 // Build full path inside package
-                string fullPath = Path.Combine(Package.Current.InstalledLocation.Path, path);
+                string fullPath = Path.Combine(Assembly.GetExecutingAssembly().Location, "../" + path);
 
                 if (!File.Exists(fullPath))
                     throw new FileNotFoundException("Icon file not found.", fullPath);

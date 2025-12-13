@@ -29,6 +29,9 @@ namespace eBrowser.Windows
             InitializeComponent();
             CustomizeTitleBar();
 
+            if (!string.IsNullOrWhiteSpace(Configuration.Current.Username) && !string.IsNullOrWhiteSpace(Configuration.Current.ApiKey))
+                MainWindow.Client.SetCredentials(new e621APICredentials(Configuration.Current.Username, Configuration.Current.ApiKey));
+
             Content.AddHandler(UIElement.KeyDownEvent,
                 new KeyEventHandler(Content_PreviewKeyDown),
                 handledEventsToo: true);
