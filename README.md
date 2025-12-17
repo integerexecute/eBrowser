@@ -7,7 +7,7 @@
 ### Requirements
 For eBrowser.Windows:
 - [Windows App SDK Runtime](https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads)
-- [WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2#download)
+- [WebView2](https://go.microsoft.com/fwlink/p/?LinkId=2124703)
 - [.NET 8.0 Runtime](https://dotnet.microsoft.com/id-id/download/dotnet/thank-you/runtime-8.0.12-windows-x64-installer)
 
 For eBrowser.Linux:
