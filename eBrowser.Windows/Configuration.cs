@@ -19,7 +19,7 @@ namespace eBrowser
         public string ApiKey { get; set; } = string.Empty;
 
         [JsonPropertyName("hide_to_sys_tray")]
-        public bool HideToSystemTray { get; set; } = false;
+        public bool HideToSystemTray { get; set; } = true;
 
         [JsonPropertyName("pause_at_hide")]
         public bool PauseVideoAtHide { get; set; } = true;

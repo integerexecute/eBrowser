@@ -14,16 +14,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="ViewModels\**" />
-    <Compile Remove="Views\Controls\**" />
-    <EmbeddedResource Remove="ViewModels\**" />
-    <EmbeddedResource Remove="Views\Controls\**" />
-    <None Remove="ViewModels\**" />
-    <None Remove="Views\Controls\**" />
-    <Page Remove="ViewModels\**" />
-    <Page Remove="Views\Controls\**" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Remove="Assets\HTML\ImageView.html" />
     <Content Remove="Assets\HTML\VideoView.html" />
   </ItemGroup>
@@ -58,6 +48,10 @@
     <PackageReference Include="H.NotifyIcon.WinUI" Version="2.3.2" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ViewModels\" />
+    <Folder Include="Views\Controls\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\e621NET\e621NET.csproj" />
@@ -118,10 +112,4 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <WindowsPackageType>None</WindowsPackageType>
   </PropertyGroup>
-  <ItemGroup>
-    <PRIResource Remove="ViewModels\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <PRIResource Remove="Views\Controls\**" />
-  </ItemGroup>
 </Project>
