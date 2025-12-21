@@ -31,6 +31,7 @@
 
         <ToggleSwitch
             Header="Pause video when window hides"
+            Visibility="{Binding HideToSystemTray, Mode=TwoWay}"
             IsOn="{Binding PauseVideoAtHide, Mode=TwoWay}" />
 
         <ToggleSwitch
